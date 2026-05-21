@@ -54,3 +54,55 @@ El modulo expone las siguientes operaciones:
 - estaVacia()
 
 Estas funciones permiten que otros integrantes puedan conectar los workers y el Pool de VRAM sin modificar la logica de produccion.
+
+
+## Responsabilidad del Integrante 2
+La responsabilidad del Integrante 2 fue implementar los Workers y el Pool de VRAM del sistema.
+
+### Pool de VRAM
+El Pool de VRAM representa el recurso compartido donde los jobs son procesados por los workers. Se implementó una capacidad máxima de 5 slots simultáneos, respetando el requerimiento solicitado en la consigna. 
+
+Para controlar el acceso concurrente al Pool de VRAM se utilizó un mutex junto con una condition_variable.
+- El mutex protege la variable compartida slotsOcupados, evitando que dos workers modifiquen el estado de la VRAM al mismo tiempo.
+- La condition_variable permite que los workers esperen cuando la VRAM se encuentra llena, evitando busy waiting y sincronizando correctamente el acceso a los slots disponibles.
+
+### Asignacion de Jobs a VRAM
+La funcion asignarVram() se encarga de:
+- Verificar si existen slots disponibles.
+- Esperar cuando la VRAM alcanza el limite de capacidad.
+- Incrementar la cantidad de slots ocupados.
+- Cambiar el estado del job a ASIGNADO_VRAM.
+- Mostrar por consola el estado de la asignacion realizada.
+
+Tambien se agrego el retardo obligatorio de 450ms solicitado en la consigna para la asignacion de jobs al Pool de VRAM. 
+
+### Liberacion de VRAM
+La funcion liberarVram() se encarga de:
+- Liberar el slot utilizado por el worker.
+- Disminuir la cantidad de slots ocupados.
+- Cambiar el estado del job a FINALIZADO.
+- Despertar a otro worker en espera mediante notify_one().
+
+Ademas, se implemento el retardo obligatorio de 250ms para la liberacion de slots del Pool de VRAM. 
+
+### Workers
+Los workers representan los consumidores del sistema. Cada worker se ejecuta en un hilo independiente y obtiene jobs desde la Message Queue compartida.
+
+El flujo implementado por cada worker es:
+- Obtener un job desde la cola.
+- Solicitar acceso al Pool de VRAM.
+- Procesar el job durante un minimo de 600ms.
+- Liberar el slot utilizado.
+
+El tiempo minimo de procesamiento tambien respeta el requerimiento solicitado en la consigna. 
+
+### Sincronizacion
+Para evitar problemas de concurrencia se utilizaron las siguientes herramientas:
+- `std::mutex`
+- `std::condition_variable`
+- `std::unique_lock`
+
+La sincronizacion implementada garantiza que:
+- Nunca existan mas de 5 jobs activos en VRAM al mismo tiempo.
+- Los workers esperen correctamente cuando no hay espacio disponible.
+- No existan accesos simultaneos invalidos sobre el recurso compartido.
