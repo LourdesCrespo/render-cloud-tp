@@ -3,6 +3,7 @@
 #include <thread>
 #include <chrono>
 #include <cstdlib>
+#include "logger.h"
 
 static int contadorIds = 0;
 static std::mutex mutexIds;
@@ -30,19 +31,31 @@ Prioridad generarPrioridad() {
 
 void Producer::ejecutar() {
     for (int i = 0; i < cantidadJobs; i++) {
+
         Job job;
         job.id = generarIdUnico();
         job.prioridad = generarPrioridad();
         job.estado = CREADO;
 
-        std::cout << "[Productor " << idProductor << "] Job creado: "
-                  << job.id << " Prioridad: " << job.prioridad << std::endl;
+        registrarEvento(job, "CREADO");
+
+        std::cout << "[Productor " << idProductor
+                  << "] Job creado: "
+                  << job.id
+                  << " Prioridad: "
+                  << job.prioridad
+                  << std::endl;
 
         messageQueue.encolar(job);
 
-        std::cout << "[Productor " << idProductor << "] Job en cola: "
-                  << job.id << std::endl;
+        registrarEvento(job, "EN_COLA");
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::cout << "[Productor " << idProductor
+                  << "] Job en cola: "
+                  << job.id
+                  << std::endl;
+
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(100));
     }
 }
