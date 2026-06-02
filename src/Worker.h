@@ -10,5 +10,5 @@ extern std::atomic<int> jobsFinalizados;
 
 void ejecutarWorker(int idWorker, MessageQueue& mq, PoolVRAM& pool, int cantidad);
 
-#endif // WORKER_H
+#endif WORKER_H
 
