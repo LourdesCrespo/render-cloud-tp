@@ -2,14 +2,16 @@
 #define POOL_VRAM_H
 
 #include <mutex>
-#include <condition_variable>
 #include "Job.h"
+#include "Semaforo.h"
+#include "logger.h"
 
 class PoolVRAM {
 private:
     int slotsOcupados;
     std::mutex mutexVram;
-    std::condition_variable cvSlots;
+
+    Semaforo semaforoSlots;
 
 public:
     PoolVRAM();
@@ -18,4 +20,4 @@ public:
     void liberarVram(Job& job, int idWorker);
 };
 
-#endif // POOLVRAM_H_INCLUDED
+#endif // POOL_VRAM_H

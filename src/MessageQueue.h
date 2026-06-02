@@ -4,6 +4,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <chrono>
 #include "Job.h"
 
 class MessageQueue {
@@ -14,10 +15,17 @@ private:
     std::mutex mutexCola;
     std::condition_variable hayJobs;
 
+    std::chrono::steady_clock::time_point inicioFlujoPremium;
+    bool flujoPremiumActivo;
+
 public:
+    MessageQueue();
+
     void encolar(Job job);
     Job obtenerSiguiente();
     bool estaVacia();
+
+    void notificarFin();
 };
 
 #endif
